@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"
+    > 
+
+<!-- 启用自动扫描 -->
+<context:component-scan base-package = "com.myHibernate"></context:component-scan>
+
+<!-- 事务管理 -->
+<tx:annotation-driven transaction-manager = "transactionManager"></tx:annotation-driven>
+
+<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+	<property name="sessionFactory" ref="sessionFactory"></property>
+</bean>
+
+<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+	<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/mysqltest1"></property>
+	<property name="maxIdleTime" value="25000"></property>
+	<property name="properties">
+		<props>
+			<prop key="user">root</prop>
+			<prop key="password">0510</prop>
+			<prop key="c3p0.acquire_increment">2</prop>
+			<prop key="c3p0.max_size">20</prop>
+			<prop key="c3p0.min_size">1</prop>
+		</props>
+	</property>
+</bean>
+
+<!-- 定义Hibernate SessionFactory -->
+<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+	<!-- datasource 可以为任意的数据源 DBCP C3P0 -->
+	<property name="dataSource">
+		<ref bean="dataSource"></ref>
+	</property>
+	
+	<!-- 映射文件路径 -->
+	<property name="mappingResources">
+		<value>com/myHibernate/bean/User.hbm.xml</value>
+	</property>
+	
+	<!-- 其他hibernate常用配置 -->
+	<property name="hibernateProperties">
+		<props>
+			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+			<prop key="hibernate.show_sql">true</prop>
+	<!--  	  <prop key="hibernate.hbm2ddl.auto">create</prop> -->
+		</props>
+	</property>
+</bean>
+
+<bean id="regeditAction" class="com.myHibernate.action.RegeditAction" autowire="byName" scope="prototype">
+	<property name="regedit">
+	<ref bean="regedit"/>
+	</property>
+</bean>
+ <bean id="regedit" class="com.myHibernate.domain.impl.RegeditImpl">
+        <property name="userDao">  
+            <ref bean="userDao" />  
+        </property>  
+  </bean>  
+  
+  <bean id="loginAction" class="com.myHibernate.action.LoginAction" autowire="byName" scope="prototype">
+	<property name="login">
+	<ref bean="login"/>
+	</property>
+</bean>
+ <bean id="login" class="com.myHibernate.domain.impl.LoginImpl">
+        <property name="userDao">  
+            <ref bean="userDao" />  
+        </property>  
+  </bean>  
+  
+   <bean id="userDao" class="com.myHibernate.dao.impl.UserDAOImpl">  
+        <property name="sessionFactory">  
+            <ref bean="sessionFactory" />  
+        </property>  
+    </bean>  
+    
+</beans>
